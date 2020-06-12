@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
@@ -39,6 +40,20 @@ public class MainActivity extends AppCompatActivity {
             try{
                 URL ruta = new URL(sRuta);
                 HttpURLConnection http = (HttpURLConnection)ruta.openConnection();
+                http.setRequestMethod("POST");
+                http.setDoInput(true);
+                http.setDoOutput(true);
+                http.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+                http.connect();
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("first_name", "Jose");
+                jsonObject.put("last_name", "Jolote");
+
+                DataOutputStream dataOutput = new DataOutputStream(http.getOutputStream());
+                dataOutput.write(jsonObject.toString().getBytes());
+                dataOutput.flush();
+                dataOutput.close();
+                
                 if(http.getResponseCode() == HttpURLConnection.HTTP_OK){
                     InputStreamReader inputStreamReader = new InputStreamReader(http.getInputStream());
                     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -46,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
             }catch(MalformedURLException e){
                 e.printStackTrace();
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
             return sResu;
@@ -61,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         miListaJSON.add(jsonObject);
                     }
+                    lstVwActors.setAdapter(new MiAdaptador(MainActivity.this,
+                            R.layout.layout_actors,
+                            miListaJSON));
                 }catch(JSONException e){
                     e.printStackTrace();
                 }
